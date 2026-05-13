@@ -1,3 +1,4 @@
+# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -8,27 +9,70 @@
 .buildlog/
 .history
 .svn/
-.swiftpm/
-migrate_working_dir/
 
+# IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
 
+# Visual Studio Code related
+.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Flutter/Dart related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
-/coverage/
 
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradle/
+**/android/local.properties
+**/android/key.properties
+**/android/app/google-services.json
+
+# iOS/macOS related
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/App.framework
+**/ios/Flutter/App.podspec
+**/ios/Flutter/App.framework.dSYM
+**/ios/.generated/
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GoogleService-Info.plist
+**/macos/Flutter/ephemeral/
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
 app.*.symbols
 
+# Obfuscation related
 app.*.map.json
 
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Android Studio will regenerate this directory
+/android/sdk.dir
+
+# Exceptions to above rules
+!**/ios/Runner/ServiceDefinitions.json
+!**/ios/Runner/GoogleService-Info.plist
+!**/android/app/src/main/google-services.json
+!**/android/app/src/debug/google-services.json
+!**/android/app/src/profile/google-services.json
