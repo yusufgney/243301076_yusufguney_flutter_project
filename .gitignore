@@ -17,12 +17,7 @@
 .idea/
 
 # Visual Studio Code related
-/.vscode
 .vscode/
-!.vscode/launch.json
-!.vscode/tasks.json
-!.vscode/settings.json
-!.vscode/extensions.json
 
 # Flutter/Dart related
 **/doc/api/
