@@ -19,12 +19,15 @@ class ThemeModeNotifier extends AsyncNotifier<ThemeMode> {
   }
 
   Future<void> setMode(ThemeMode mode) async {
-    state = const AsyncLoading();
+    // Optimistically update the UI state immediately for zero lag.
+    state = AsyncData(mode);
+
+    // Persist in background
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kThemeModeKey, mode.name);
-    state = AsyncData(mode);
   }
 }
 
-final themeModeProvider =
-    AsyncNotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider = AsyncNotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);

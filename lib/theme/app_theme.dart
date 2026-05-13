@@ -58,8 +58,12 @@ class AppTheme {
         fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3),
   );
 
-  // ─── Theme ─────────────────────────────────────────────────────────────────
+  // ─── Theme Caching ─────────────────────────────────────────────────────────
+  static ThemeData? _lightTheme;
+  static ThemeData? _darkTheme;
+
   static ThemeData get light {
+    if (_lightTheme != null) return _lightTheme!;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primary,
       brightness: Brightness.light,
@@ -76,7 +80,7 @@ class AppTheme {
       onSurface: onSurface,
     );
 
-    return ThemeData(
+    final theme = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: textTheme,
@@ -205,9 +209,13 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: borderRadiusMd),
       ),
     );
+    
+    _lightTheme = theme;
+    return theme;
   }
 
   static ThemeData get dark {
+    if (_darkTheme != null) return _darkTheme!;
     const dSurface = Color(0xFF1C1C1E);
     const dSurfaceDim = Color(0xFF000000);
     const dSurfaceVariant = Color(0xFF2C2C2E);
@@ -231,7 +239,7 @@ class AppTheme {
       onSurface: dOnSurface,
     );
 
-    return ThemeData(
+    final theme = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: textTheme.apply(
@@ -345,5 +353,8 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: borderRadiusMd),
       ),
     );
+    
+    _darkTheme = theme;
+    return theme;
   }
 }

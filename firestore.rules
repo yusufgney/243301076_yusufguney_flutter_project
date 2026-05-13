@@ -5,18 +5,14 @@ service cloud.firestore {
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    /// True if the request comes from a signed-in user.
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /// True if the signed-in user's UID matches the given uid.
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    /// Reads the caller's role from the users collection.
-    /// Returns the role string, e.g. "actor" or "agency".
     function callerRole() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
@@ -29,94 +25,88 @@ service cloud.firestore {
       return isSignedIn() && callerRole() == 'agency';
     }
 
-    // ─── /users/{uid} ─────────────────────────────────────────────────────────
-    // Stores basic auth metadata + role for every account.
-    match /users/{uid} {
-      // A user may read their own document (needed for role resolution).
-      allow read: if isOwner(uid);
+    function applicationDocPath(appId) {
+      return /databases/$(database)/documents/applications/$(appId);
+    }
 
-      // Created automatically on registration; only the owner may update.
+    /// Project exists and was created by the given uid.
+    function projectOwnedBy(projectId, uid) {
+      return exists(/databases/$(database)/documents/casting_projects/$(projectId))
+        && get(/databases/$(database)/documents/casting_projects/$(projectId)).data.createdBy == uid;
+    }
+
+    // ─── /users/{uid} ─────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isOwner(uid);
       allow write: if isOwner(uid);
     }
 
-    // ─── /actors/{uid} ────────────────────────────────────────────────────────
-    // Actor profile data (fullName, age, skills, bio, …)
+    // ─── /actors/{uid} ───────────────────────────────────────────────────────
     match /actors/{uid} {
-      // Agencies can read actor profiles (e.g. when reviewing applicants).
-      // Actors can read their own profile.
       allow read: if isOwner(uid) || isAgency();
-
-      // Only the actor themselves may create or update their own profile.
       allow write: if isOwner(uid) && isActor();
     }
 
-    // ─── /agencies/{uid} ──────────────────────────────────────────────────────
-    // Agency profile data (agencyName, city, contactEmail, description)
+    // ─── /agencies/{uid} ─────────────────────────────────────────────────────
     match /agencies/{uid} {
-      // Anyone authenticated may read agency profiles
-      // (actors see the agency name on project cards).
       allow read: if isSignedIn();
-
-      // Only the owning agency account may write.
       allow write: if isOwner(uid) && isAgency();
     }
 
-    // ─── /casting_projects/{projectId} ────────────────────────────────────────
-    // Casting calls created by agencies.
+    // ─── /casting_projects/{projectId} ───────────────────────────────────────
     match /casting_projects/{projectId} {
-      // All authenticated users may read projects.
       allow read: if isSignedIn();
-
-      // Only agencies may create projects.
-      // The createdBy field must match the caller's UID.
       allow create: if isAgency()
-                    && request.resource.data.createdBy == request.auth.uid;
-
-      // Only the owning agency may update or delete their own project.
+        && request.resource.data.createdBy == request.auth.uid;
       allow update, delete: if isAgency()
-                             && resource.data.createdBy == request.auth.uid;
+        && resource.data.createdBy == request.auth.uid;
     }
 
-    // ─── /applications/{applicationId} ────────────────────────────────────────
-    // Application documents use a deterministic ID: "{actorId}_{projectId}".
+    // ─── /applications/{applicationId}  (id = "{actorId}_{projectId}") ───────
     match /applications/{applicationId} {
-      // Actors can read their own applications.
-      // Agencies can read applications for their own projects.
+      // Single-doc listen on a missing application must still be allowed (OR short-circuits).
       allow read: if isSignedIn() && (
-        // actor reading their own application
-        resource.data.actorId == request.auth.uid ||
-        // agency reading applications for a project they own
-        get(/databases/$(database)/documents/casting_projects/$(resource.data.projectId)).data.createdBy == request.auth.uid
+        !exists(applicationDocPath(applicationId))
+        || resource.data.actorId == request.auth.uid
+        || projectOwnedBy(resource.data.projectId, request.auth.uid)
       );
 
-      // Only actors may create an application.
-      // The actorId in the document must match the caller.
       allow create: if isActor()
-                    && request.resource.data.actorId == request.auth.uid
-                    && request.resource.data.status == 'pending';
+        && request.resource.data.actorId == request.auth.uid
+        && request.resource.data.status == 'pending';
 
-      // Only the owning agency may update the status (accept / reject).
       allow update: if isAgency()
-                    && get(/databases/$(database)/documents/casting_projects/$(resource.data.projectId)).data.createdBy == request.auth.uid
-                    // Actors cannot change the status themselves
-                    && request.resource.data.actorId == resource.data.actorId
-                    && request.resource.data.projectId == resource.data.projectId;
+        && projectOwnedBy(resource.data.projectId, request.auth.uid)
+        && request.resource.data.actorId == resource.data.actorId
+        && request.resource.data.projectId == resource.data.projectId;
 
-      // No one may delete applications (audit trail).
-      allow delete: if false;
+      // Agency may remove applications when deleting a listing (client batch delete).
+      allow delete: if isAgency()
+        && projectOwnedBy(resource.data.projectId, request.auth.uid);
     }
 
-    // ─── /notifications/{notificationId} ──────────────────────────────────────
-    // Reserved for future use; users may only read their own notifications.
+    // ─── /notifications/{notificationId} ─────────────────────────────────────
+    // App fields: userId, kind, title, body, projectId?, read, createdAt
     match /notifications/{notificationId} {
-      // A user can only read notifications addressed to them.
       allow read: if isSignedIn()
-                  && resource.data.recipientUid == request.auth.uid;
+        && resource.data.userId == request.auth.uid;
 
-      // Notifications are created server-side (Cloud Functions).
-      // No client writes allowed.
-      allow write: if false;
+      // Agency creates outcome notifications for actors on their own project.
+      allow create: if isAgency()
+        && request.resource.data.userId is string
+        && request.resource.data.keys().hasAll(['userId', 'kind', 'title', 'body', 'read', 'createdAt'])
+        && (
+          !('projectId' in request.resource.data)
+          || (
+            request.resource.data.projectId is string
+            && projectOwnedBy(request.resource.data.projectId, request.auth.uid)
+          )
+        );
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['read']);
     }
-
   }
 }

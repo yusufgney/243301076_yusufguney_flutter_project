@@ -17,6 +17,7 @@
 .idea/
 
 # Visual Studio Code related
+/.vscode
 .vscode/
 !.vscode/launch.json
 !.vscode/tasks.json

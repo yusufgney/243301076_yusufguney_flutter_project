@@ -21,6 +21,11 @@ final actorApplicationForProjectProvider =
       );
 });
 
+/// Number of applications submitted for [projectId] (for agency badges).
+final projectApplicationCountProvider = StreamProvider.family<int, String>((ref, projectId) {
+  return ref.watch(applicationServiceProvider).watchApplicationsForProject(projectId).map((list) => list.length);
+});
+
 /// Applications submitted to [projectId] (for agency review).
 final applicationsForProjectProvider =
     StreamProvider.family<List<ApplicationModel>, String>((ref, projectId) {

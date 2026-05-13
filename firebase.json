@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"castflow-5ce2b","appId":"1:71088167133:android:cc826e5477390c5005e334","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"castflow-5ce2b","configurations":{"android":"1:71088167133:android:cc826e5477390c5005e334","web":"1:71088167133:web:1166cbf8b119bc4d05e334"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "castflow-5ce2b",
+          "appId": "1:71088167133:android:cc826e5477390c5005e334",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "castflow-5ce2b",
+          "configurations": {
+            "android": "1:71088167133:android:cc826e5477390c5005e334",
+            "web": "1:71088167133:web:1166cbf8b119bc4d05e334"
+          }
+        }
+      }
+    }
+  }
+}

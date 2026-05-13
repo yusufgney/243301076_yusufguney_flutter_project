@@ -6,6 +6,7 @@ import '../models/agency_model.dart';
 import '../models/project_model.dart';
 import '../providers/agency_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/application_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
@@ -132,13 +133,16 @@ class _ProjectsTab extends ConsumerWidget {
   }
 }
 
-class _AgencyProjectCard extends StatelessWidget {
+class _AgencyProjectCard extends ConsumerWidget {
   final ProjectModel project;
   const _AgencyProjectCard({required this.project});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final countAsync = ref.watch(projectApplicationCountProvider(project.id));
+    final applicantCount = countAsync.maybeWhen(data: (c) => c, orElse: () => 0);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spacingMd),
@@ -151,14 +155,27 @@ class _AgencyProjectCard extends StatelessWidget {
                   child: Text(project.title, style: theme.textTheme.titleMedium),
                 ),
                 const SizedBox(width: AppTheme.spacingXs),
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/project-applicants/${project.id}'),
-                  icon: const Icon(Icons.people_outline, size: 16),
-                  label: const Text('Applicants'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: Size.zero,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    textStyle: theme.textTheme.labelSmall,
+                Badge(
+                  isLabelVisible: applicantCount > 0,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  label: Text(
+                    applicantCount > 99 ? '99+' : '$applicantCount',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: OutlinedButton.icon(
+                    onPressed: () => context.push('/project-applicants/${project.id}'),
+                    icon: const Icon(Icons.people_outline, size: 16),
+                    label: const Text('Applicants'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      textStyle: theme.textTheme.labelSmall,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppTheme.spacingXs),

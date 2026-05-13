@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/theme/theme_notifier.dart';
+import '../providers/theme_provider.dart';
 
 /// AppBar için yeniden kullanılabilir ikon butonu.
 class ThemeToggleIconButton extends ConsumerWidget {
@@ -9,13 +9,16 @@ class ThemeToggleIconButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeProvider);
-    final isDark = themeMode == ThemeMode.dark;
+    final themeModeAsync = ref.watch(themeModeProvider);
+    final isDark = themeModeAsync.value == ThemeMode.dark;
 
     return IconButton(
       icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
       tooltip: isDark ? 'Light Mode' : 'Dark Mode',
-      onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+      onPressed: () {
+        final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
+        ref.read(themeModeProvider.notifier).setMode(newMode);
+      },
     );
   }
 }
@@ -26,15 +29,17 @@ class ThemeToggleListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeProvider);
-    final isDark = themeMode == ThemeMode.dark;
+    final themeModeAsync = ref.watch(themeModeProvider);
+    final isDark = themeModeAsync.value == ThemeMode.dark;
 
     return SwitchListTile(
       title: const Text('Dark Mode'),
       subtitle: const Text('Tema rengini değiştir'),
       secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
       value: isDark,
-      onChanged: (_) => ref.read(themeProvider.notifier).toggleTheme(),
+      onChanged: (val) {
+        ref.read(themeModeProvider.notifier).setMode(val ? ThemeMode.dark : ThemeMode.light);
+      },
     );
   }
 }

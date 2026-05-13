@@ -26,6 +26,11 @@ final actorProfileProvider = StreamProvider<ActorModel?>((ref) {
   return Stream.value(null);
 });
 
+/// Live actor profile stream by uid (e.g. agency viewing an applicant).
+final actorProfileStreamByIdProvider = StreamProvider.family<ActorModel?, String>((ref, uid) {
+  return ref.watch(actorServiceProvider).getActorProfile(uid);
+});
+
 /// One-shot actor public profile by uid (e.g. agency viewing an applicant).
 final actorByIdProvider = FutureProvider.family<ActorModel?, String>((ref, uid) async {
   final doc = await ref.read(firestoreProvider).collection('actors').doc(uid).get();

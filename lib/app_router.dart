@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/project_model.dart';
 import '../models/user_model.dart';
 import 'pages/actor_dashboard_page.dart';
+import 'pages/agency_applicant_profile_page.dart';
 import 'pages/agency_dashboard_page.dart';
 import 'pages/create_project_page.dart';
 import 'pages/edit_actor_profile_page.dart';
@@ -65,6 +66,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (loc.startsWith('/project-applicants') && role != UserRole.agency) {
         return targetDashboard;
       }
+      if (loc.startsWith('/agency-actor') && role != UserRole.agency) {
+        return targetDashboard;
+      }
       if (loc.startsWith('/create-project') && role != UserRole.agency) {
         return targetDashboard;
       }
@@ -113,6 +117,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/project-applicants/:projectId',
         builder: (context, state) => ProjectApplicantsPage(
           projectId: state.pathParameters['projectId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/agency-actor/:actorId',
+        builder: (context, state) => AgencyApplicantProfilePage(
+          actorId: state.pathParameters['actorId'] ?? '',
         ),
       ),
     ],
