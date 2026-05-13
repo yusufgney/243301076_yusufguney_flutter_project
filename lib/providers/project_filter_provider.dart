@@ -59,6 +59,7 @@ final filteredProjectsQueryProvider =
     }
   }
 
-  q = q.orderBy('createdAt', descending: true);
+  // Note: orderBy is removed to avoid composite index requirements.
+  // Sorting is performed locally in allProjectsProvider.
   return q;
 });

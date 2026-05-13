@@ -48,4 +48,23 @@ class ProjectFilter {
 
   bool get hasAnyActive =>
       hasActiveCity || hasActiveGender || hasAgeFilter || hasActiveSkills;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProjectFilter &&
+          runtimeType == other.runtimeType &&
+          city == other.city &&
+          gender == other.gender &&
+          ageMin == other.ageMin &&
+          ageMax == other.ageMax &&
+          listEquals(skills, other.skills);
+
+  @override
+  int get hashCode =>
+      city.hashCode ^
+      gender.hashCode ^
+      ageMin.hashCode ^
+      ageMax.hashCode ^
+      skills.hashCode;
 }

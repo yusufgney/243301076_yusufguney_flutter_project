@@ -5,14 +5,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/project_model.dart';
 import '../services/project_service.dart';
 import 'auth_provider.dart';
+import 'project_filter_provider.dart';
 
 final projectServiceProvider = Provider<ProjectService>((ref) {
   return ProjectService(ref.watch(firestoreProvider));
 });
 
-/// All casting projects – for actors browsing.
+/// All casting projects – filtered for actors browsing.
 final allProjectsProvider = StreamProvider<List<ProjectModel>>((ref) {
-  return ref.watch(projectServiceProvider).getAllProjects();
+  final query = ref.watch(filteredProjectsQueryProvider);
+  return query.snapshots().map((snapshot) {
+    final list = snapshot.docs
+        .map((doc) => ProjectModel.fromMap(doc.data(), doc.id))
+        .toList();
+    // Local sort to avoid composite index requirement
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
+  });
 });
 
 /// Projects created by the signed-in agency.

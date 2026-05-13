@@ -7,6 +7,7 @@ import '../providers/actor_provider.dart';
 import '../providers/application_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/project_filter_provider.dart';
 import '../providers/project_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/project_card.dart';
@@ -108,6 +109,18 @@ class _ProjectsTab extends ConsumerWidget {
           ],
         ),
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final hasFilter = ref.watch(projectFilterProvider.select((f) => f.hasAnyActive));
+              if (!hasFilter) return const SizedBox.shrink();
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(Icons.filter_alt, size: 18, color: theme.colorScheme.primary),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list_rounded),
             tooltip: 'Filter',

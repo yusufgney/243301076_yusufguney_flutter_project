@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/project_model.dart';
 import '../providers/project_filter_provider.dart';
 import '../theme/app_breakpoints.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_empty_state.dart';
 import '../widgets/app_error_state.dart';
 import '../widgets/app_loading.dart';
+import '../providers/project_provider.dart';
 import '../widgets/project_card.dart';
 import '../widgets/project_filter_bottom_sheet.dart';
 import '../widgets/responsive_frame.dart';
@@ -19,8 +19,7 @@ class ProjectListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query = ref.watch(filteredProjectsQueryProvider);
-    final projectsStream = query.snapshots();
+    final projectsAsync = ref.watch(allProjectsProvider);
     final filter = ref.watch(projectFilterProvider);
 
     return Scaffold(
@@ -53,20 +52,10 @@ class ProjectListPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: StreamBuilder(
-        stream: projectsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return AppErrorState(error: snapshot.error ?? 'Unknown error');
-          }
-          if (!snapshot.hasData) {
-            return const AppLoadingIndicator(message: 'Loading projects…');
-          }
-
-          final projects = snapshot.data!.docs
-              .map((doc) => ProjectModel.fromMap(doc.data(), doc.id))
-              .toList();
-
+      body: projectsAsync.when(
+        loading: () => const AppLoadingIndicator(message: 'Loading projects…'),
+        error: (error, stack) => AppErrorState(error: error.toString()),
+        data: (projects) {
           if (projects.isEmpty) {
             return AppEmptyState(
               icon: Icons.search_off_rounded,

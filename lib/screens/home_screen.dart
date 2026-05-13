@@ -77,10 +77,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Buton Testi
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Devam Et'),
-            ),
+            ElevatedButton(onPressed: () {}, child: const Text('Devam Et')),
           ],
         ),
       ),

@@ -32,10 +32,6 @@ class ProjectFilterPage extends ConsumerWidget {
           ref.read(projectFilterProvider.notifier).setFilter(filter);
           Navigator.of(context).pop();
         },
-        onClear: () {
-          ref.read(projectFilterProvider.notifier).clear();
-          Navigator.of(context).pop();
-        },
       ),
     );
   }

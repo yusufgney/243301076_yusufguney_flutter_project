@@ -36,10 +36,6 @@ Future<void> showProjectFilterBottomSheet(BuildContext context, WidgetRef ref) {
                     ref.read(projectFilterProvider.notifier).setFilter(filter);
                     Navigator.of(sheetContext).pop();
                   },
-                  onClear: () {
-                    ref.read(projectFilterProvider.notifier).clear();
-                    Navigator.of(sheetContext).pop();
-                  },
                 ),
               ),
             ],

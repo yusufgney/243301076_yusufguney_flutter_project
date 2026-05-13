@@ -9,13 +9,10 @@ typedef ProjectFilterCallback = void Function(ProjectFilter filter);
 class ProjectFilterForm extends StatefulWidget {
   final ProjectFilter initial;
   final ProjectFilterCallback onApply;
-  final VoidCallback? onClear;
-
   const ProjectFilterForm({
     super.key,
     required this.initial,
     required this.onApply,
-    this.onClear,
   });
 
   @override
@@ -92,14 +89,6 @@ class _ProjectFilterFormState extends State<ProjectFilterForm> {
     widget.onApply(filter);
   }
 
-  void _clear() {
-    _cityController.clear();
-    _ageMinController.clear();
-    _ageMaxController.clear();
-    _skillsController.clear();
-    setState(() => _gender = 'Any');
-    widget.onClear?.call();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,15 +196,6 @@ class _ProjectFilterFormState extends State<ProjectFilterForm> {
             child: FilledButton(
               onPressed: _apply,
               child: const Text('Apply'),
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingSm),
-          Semantics(
-            button: true,
-            label: 'Clear filters',
-            child: OutlinedButton(
-              onPressed: _clear,
-              child: const Text('Clear'),
             ),
           ),
         ],
