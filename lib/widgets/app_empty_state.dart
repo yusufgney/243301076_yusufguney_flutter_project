@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-/// Consistent empty list / no-data presentation.
 class AppEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;

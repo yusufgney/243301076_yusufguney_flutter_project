@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/project_filter.dart';
 import 'auth_provider.dart';
 
-/// Current project list filters (Firestore query).
 final projectFilterProvider =
     NotifierProvider<ProjectFilterNotifier, ProjectFilter>(
   ProjectFilterNotifier.new,
@@ -19,11 +18,6 @@ class ProjectFilterNotifier extends Notifier<ProjectFilter> {
   void clear() => state = const ProjectFilter();
 }
 
-/// Builds a [Query] for `casting_projects` using Firestore `where` clauses.
-///
-/// Composite indexes may be required when combining filters with
-/// `orderBy('createdAt')`. The console / SDK error usually includes a link
-/// to create the missing index.
 final filteredProjectsQueryProvider =
     Provider<Query<Map<String, dynamic>>>((ref) {
   final db = ref.watch(firestoreProvider);
@@ -59,7 +53,5 @@ final filteredProjectsQueryProvider =
     }
   }
 
-  // Note: orderBy is removed to avoid composite index requirements.
-  // Sorting is performed locally in allProjectsProvider.
   return q;
 });

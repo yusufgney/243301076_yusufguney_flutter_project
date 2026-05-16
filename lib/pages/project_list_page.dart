@@ -13,7 +13,6 @@ import '../widgets/project_card.dart';
 import '../widgets/project_filter_bottom_sheet.dart';
 import '../widgets/responsive_frame.dart';
 
-/// Lists casting projects fetched from Firestore.
 class ProjectListPage extends ConsumerWidget {
   const ProjectListPage({super.key});
 

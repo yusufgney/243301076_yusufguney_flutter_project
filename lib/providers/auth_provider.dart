@@ -36,7 +36,6 @@ final userModelProvider = StreamProvider<UserModel?>((ref) {
 class AuthStateNotifier extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {
-    // nothing to build
   }
 
   Future<void> login(String email, String password) async {

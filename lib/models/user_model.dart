@@ -19,7 +19,7 @@ class UserModel {
       email: map['email'] as String? ?? '',
       role: UserRole.values.firstWhere(
         (e) => e.name == map['role'],
-        orElse: () => UserRole.actor, // default fallback
+        orElse: () => UserRole.actor,
       ),
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'] as String)

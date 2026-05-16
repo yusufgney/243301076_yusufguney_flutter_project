@@ -26,12 +26,10 @@ final actorProfileProvider = StreamProvider<ActorModel?>((ref) {
   return Stream.value(null);
 });
 
-/// Live actor profile stream by uid (e.g. agency viewing an applicant).
 final actorProfileStreamByIdProvider = StreamProvider.family<ActorModel?, String>((ref, uid) {
   return ref.watch(actorServiceProvider).getActorProfile(uid);
 });
 
-/// One-shot actor public profile by uid (e.g. agency viewing an applicant).
 final actorByIdProvider = FutureProvider.family<ActorModel?, String>((ref, uid) async {
   final doc = await ref.read(firestoreProvider).collection('actors').doc(uid).get();
   if (!doc.exists || doc.data() == null) return null;
@@ -41,7 +39,6 @@ final actorByIdProvider = FutureProvider.family<ActorModel?, String>((ref, uid) 
 class ActorProfileNotifier extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {
-    // nothing to build
   }
 
   Future<void> saveProfile({
@@ -52,7 +49,6 @@ class ActorProfileNotifier extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       String? imageUrl = profile.profileImageUrl;
-      
       if (imageBytes != null && imageExtension != null) {
         imageUrl = await ref
             .read(actorServiceProvider)

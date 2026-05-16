@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_breakpoints.dart';
 import '../theme/app_theme.dart';
 
-/// Centered scrollable card used by auth screens.
 class AuthFormShell extends StatelessWidget {
   final Widget child;
 

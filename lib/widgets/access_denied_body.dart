@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'app_empty_state.dart';
 
-/// Role or permission mismatch (full-page body).
 class AccessDeniedBody extends StatelessWidget {
   final String title;
   final String message;

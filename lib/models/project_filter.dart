@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-/// Firestore-backed filter criteria for casting projects.
 @immutable
 class ProjectFilter {
   final String? city;
-  /// `Any`, `Male`, or `Female` — matches stored `genderRequirement`.
   final String gender;
   final int? ageMin;
   final int? ageMax;

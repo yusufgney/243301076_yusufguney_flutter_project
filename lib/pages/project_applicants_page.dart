@@ -14,10 +14,10 @@ import '../widgets/access_denied_body.dart';
 import '../widgets/app_empty_state.dart';
 import '../widgets/app_error_state.dart';
 import '../widgets/app_loading.dart';
+import '../widgets/application_status_chip.dart';
 import '../widgets/async_value_view.dart';
 import '../widgets/responsive_frame.dart';
 
-/// Agency-only: list applicants for a project and accept or reject pending applications.
 class ProjectApplicantsPage extends ConsumerWidget {
   final String projectId;
 
@@ -241,7 +241,7 @@ class _ApplicantCardState extends ConsumerState<_ApplicantCard> {
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: AppTheme.spacingSm),
-                      _StatusChip(status: widget.application.status),
+                      ApplicationStatusChip(status: widget.application.status, showIcon: true),
                     ],
                   ),
                 ),
@@ -288,41 +288,3 @@ class _ApplicantCardState extends ConsumerState<_ApplicantCard> {
   }
 }
 
-class _StatusChip extends StatelessWidget {
-  final ApplicationStatus status;
-
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    late Color bg;
-    late Color fg;
-    late IconData icon;
-    switch (status) {
-      case ApplicationStatus.pending:
-        bg = scheme.secondaryContainer;
-        fg = scheme.onSecondaryContainer;
-        icon = Icons.hourglass_top_rounded;
-        break;
-      case ApplicationStatus.accepted:
-        bg = scheme.primaryContainer;
-        fg = scheme.onPrimaryContainer;
-        icon = Icons.check_circle_outline;
-        break;
-      case ApplicationStatus.rejected:
-        bg = scheme.errorContainer;
-        fg = scheme.onErrorContainer;
-        icon = Icons.cancel_outlined;
-        break;
-    }
-    return Chip(
-      avatar: Icon(icon, size: 18, color: fg),
-      label: Text(status.name),
-      backgroundColor: bg,
-      labelStyle: TextStyle(color: fg, fontWeight: FontWeight.w600),
-      side: BorderSide.none,
-      padding: EdgeInsets.zero,
-    );
-  }
-}

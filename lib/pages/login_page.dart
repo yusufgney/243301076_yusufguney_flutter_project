@@ -40,7 +40,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  /// Web/desktop: Enter / numpad Enter triggers same action as the Login button.
   bool _handleHardwareEnterKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
     final key = event.logicalKey;

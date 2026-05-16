@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Returns true if the user confirmed permanent deletion.
 Future<bool> confirmDeleteCastingProject(BuildContext context, String projectTitle) async {
   final result = await showDialog<bool>(
     context: context,

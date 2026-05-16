@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_error_state.dart';
 import 'app_loading.dart';
 
-/// Standard loading / error / empty handling for [AsyncValue].
 class AsyncValueView<T> extends StatelessWidget {
   final AsyncValue<T> value;
   final Widget Function(T data) data;

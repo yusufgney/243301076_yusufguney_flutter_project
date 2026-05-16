@@ -11,20 +11,17 @@ final projectServiceProvider = Provider<ProjectService>((ref) {
   return ProjectService(ref.watch(firestoreProvider));
 });
 
-/// All casting projects – filtered for actors browsing.
 final allProjectsProvider = StreamProvider<List<ProjectModel>>((ref) {
   final query = ref.watch(filteredProjectsQueryProvider);
   return query.snapshots().map((snapshot) {
     final list = snapshot.docs
         .map((doc) => ProjectModel.fromMap(doc.data(), doc.id))
         .toList();
-    // Local sort to avoid composite index requirement
     list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   });
 });
 
-/// Projects created by the signed-in agency.
 final agencyProjectsProvider = StreamProvider<List<ProjectModel>>((ref) {
   final uid = ref.watch(authStateProvider).value?.uid;
   if (uid == null) return Stream.value(const []);

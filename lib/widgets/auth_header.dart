@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-/// Shared title + subtitle for login and register.
 class AuthHeader extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -16,6 +15,7 @@ class AuthHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,7 +23,7 @@ class AuthHeader extends StatelessWidget {
         const SizedBox(height: AppTheme.spacingXs),
         Text(
           subtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
+          style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant, height: 1.4),
         ),
       ],
     );

@@ -20,7 +20,6 @@ final agencyProfileProvider = StreamProvider<AgencyModel?>((ref) {
 class AgencyProfileNotifier extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {
-    // nothing to build
   }
 
   Future<void> saveProfile(AgencyModel profile) async {

@@ -36,16 +36,11 @@ class ApplicationModel {
     };
   }
 
-  static ApplicationStatus _stringToStatus(String? status) {
-    switch (status) {
-      case 'accepted':
-        return ApplicationStatus.accepted;
-      case 'rejected':
-        return ApplicationStatus.rejected;
-      default:
-        return ApplicationStatus.pending;
-    }
-  }
+  static ApplicationStatus _stringToStatus(String? status) => switch (status) {
+    'accepted' => ApplicationStatus.accepted,
+    'rejected' => ApplicationStatus.rejected,
+    _ => ApplicationStatus.pending,
+  };
 
   static String statusToString(ApplicationStatus status) {
     return status.name;

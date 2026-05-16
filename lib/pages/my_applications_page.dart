@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_empty_state.dart';
 import '../widgets/app_loading.dart';
+import '../widgets/application_status_chip.dart';
 import '../widgets/async_value_view.dart';
 import '../widgets/responsive_frame.dart';
 
@@ -119,7 +120,7 @@ class _ApplicationCard extends ConsumerWidget {
                   style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppTheme.spacingSm),
-                _StatusChip(status: application.status),
+                ApplicationStatusChip(status: application.status),
               ],
             ),
             trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
@@ -135,43 +136,3 @@ class _ApplicationCard extends ConsumerWidget {
   }
 }
 
-class _StatusChip extends StatelessWidget {
-  final ApplicationStatus status;
-
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    late Color bg;
-    late Color fg;
-    late String label;
-    switch (status) {
-      case ApplicationStatus.pending:
-        bg = scheme.secondaryContainer;
-        fg = scheme.onSecondaryContainer;
-        label = 'Pending';
-        break;
-      case ApplicationStatus.accepted:
-        bg = scheme.primaryContainer;
-        fg = scheme.onPrimaryContainer;
-        label = 'Accepted';
-        break;
-      case ApplicationStatus.rejected:
-        bg = scheme.errorContainer;
-        fg = scheme.onErrorContainer;
-        label = 'Declined';
-        break;
-    }
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Chip(
-        label: Text(label, style: TextStyle(color: fg, fontWeight: FontWeight.w600, fontSize: 12)),
-        backgroundColor: bg,
-        side: BorderSide.none,
-        visualDensity: VisualDensity.compact,
-        padding: EdgeInsets.zero,
-      ),
-    );
-  }
-}

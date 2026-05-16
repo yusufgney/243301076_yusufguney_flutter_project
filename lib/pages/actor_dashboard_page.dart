@@ -10,6 +10,8 @@ import '../providers/theme_provider.dart';
 import '../providers/project_filter_provider.dart';
 import '../providers/project_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_empty_state.dart';
+import '../widgets/application_status_chip.dart';
 import '../widgets/project_card.dart';
 
 class ActorDashboardPage extends ConsumerStatefulWidget {
@@ -24,17 +26,13 @@ class _ActorDashboardPageState extends ConsumerState<ActorDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userEmail = ref.watch(userModelProvider).value?.email ?? '';
-
-    final pages = [
-      const _ProjectsTab(),
-      const _MyApplicationsTab(),
-      const _ProfileTab(),
-      _SettingsTab(email: userEmail),
-    ];
-
     return Scaffold(
-      body: pages[_selectedIndex],
+      body: const [
+        _ProjectsTab(),
+        _MyApplicationsTab(),
+        _ProfileTab(),
+        _SettingsTab(),
+      ][_selectedIndex],
       bottomNavigationBar: _buildNav(context),
     );
   }
@@ -74,7 +72,6 @@ class _ActorDashboardPageState extends ConsumerState<ActorDashboardPage> {
   }
 }
 
-// ─── Projects Tab ─────────────────────────────────────────────────────────────
 class _ProjectsTab extends ConsumerWidget {
   const _ProjectsTab();
 
@@ -131,7 +128,7 @@ class _ProjectsTab extends ConsumerWidget {
       body: projectsAsync.when(
         data: (projects) {
           if (projects.isEmpty) {
-            return _EmptyHero(
+            return const AppEmptyState(
               icon: Icons.work_outline_rounded,
               title: 'No casting calls yet',
               message: 'Check back later — agencies will post roles here.',
@@ -160,7 +157,6 @@ class _ProjectsTab extends ConsumerWidget {
   }
 }
 
-// ─── My Applications Tab ──────────────────────────────────────────────────────
 class _MyApplicationsTab extends ConsumerWidget {
   const _MyApplicationsTab();
 
@@ -177,7 +173,7 @@ class _MyApplicationsTab extends ConsumerWidget {
       body: applicationsAsync.when(
         data: (applications) {
           if (applications.isEmpty) {
-            return _EmptyHero(
+            return const AppEmptyState(
               icon: Icons.assignment_outlined,
               title: 'No applications yet',
               message: 'Apply to casting calls — your submissions will appear here.',
@@ -203,7 +199,7 @@ class _MyApplicationsTab extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 4),
                     child: Row(
                       children: [
-                        _StatusBadge(status: app.status),
+                        ApplicationStatusChip(status: app.status),
                         const SizedBox(width: AppTheme.spacingXs),
                         Text(
                           _formatDate(app.createdAt),
@@ -231,7 +227,6 @@ class _MyApplicationsTab extends ConsumerWidget {
       '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 }
 
-// ─── Profile Tab ──────────────────────────────────────────────────────────────
 class _ProfileTab extends ConsumerWidget {
   const _ProfileTab();
 
@@ -255,7 +250,7 @@ class _ProfileTab extends ConsumerWidget {
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            return _EmptyHero(
+            return AppEmptyState(
               icon: Icons.person_outline_rounded,
               title: 'Profile incomplete',
               message: 'Create your profile so agencies can discover you.',
@@ -286,7 +281,6 @@ class _ActorProfileView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar
           CircleAvatar(
             radius: 52,
             backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
@@ -303,10 +297,10 @@ class _ActorProfileView extends StatelessWidget {
           const SizedBox(height: AppTheme.spacingMd),
           Text(profile.fullName, style: theme.textTheme.headlineMedium),
           const SizedBox(height: 4),
-          Text(profile.city, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          Text(_formatLocation(profile),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppTheme.spacingLg),
 
-          // Stats row
           Row(
             children: [
               Expanded(child: _StatCard(label: 'Age', value: '${profile.age}')),
@@ -318,7 +312,6 @@ class _ActorProfileView extends StatelessWidget {
           ),
           const SizedBox(height: AppTheme.spacingMd),
 
-          // Details card
           Card(
             child: Padding(
               padding: const EdgeInsets.all(AppTheme.spacingMd),
@@ -326,6 +319,7 @@ class _ActorProfileView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _DetailRow(label: 'Gender', value: profile.gender),
+                  _DetailRow(label: 'Ethnicity', value: profile.ethnicity.isEmpty ? '—' : profile.ethnicity),
                   const Divider(),
                   _DetailRow(
                     label: 'Skills',
@@ -345,16 +339,23 @@ class _ActorProfileView extends StatelessWidget {
       ),
     );
   }
+
+  String _formatLocation(ActorModel a) {
+    if (a.city.isEmpty && a.country.isEmpty) return '—';
+    if (a.city.isEmpty) return a.country;
+    if (a.country.isEmpty) return a.city;
+    return '${a.country}, ${a.city}';
+  }
 }
 
-// ─── Settings Tab ─────────────────────────────────────────────────────────────
 class _SettingsTab extends ConsumerWidget {
-  final String email;
-  const _SettingsTab({required this.email});
+  const _SettingsTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userModel = ref.watch(userModelProvider).value;
     final authCtrl = ref.watch(authControllerProvider);
+    final email = userModel?.email ?? '';
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -363,7 +364,6 @@ class _SettingsTab extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppTheme.spacingMd),
         children: [
-          // Account section
           Text('Account', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppTheme.spacingXs),
           Card(
@@ -377,7 +377,10 @@ class _SettingsTab extends ConsumerWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.person_outline, color: theme.colorScheme.onSurfaceVariant),
-                  title: const Text('Edit Profile'),
+                  title: Consumer(builder: (context, ref, _) {
+                    final profile = ref.watch(actorProfileProvider).value;
+                    return Text(profile == null ? 'Create Profile' : 'Edit Profile');
+                  }),
                   trailing: const Icon(Icons.chevron_right, size: 18),
                   onTap: () => context.push('/edit-actor-profile'),
                 ),
@@ -385,13 +388,12 @@ class _SettingsTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppTheme.spacingLg),
-          // Preferences section
           Text('Preferences', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppTheme.spacingXs),
           Card(
             child: Consumer(builder: (context, ref, _) {
-              final themeModeAsync = ref.watch(themeModeProvider);
-              final isDark = themeModeAsync.value == ThemeMode.dark;
+              final themeMode = ref.watch(themeModeProvider);
+              final isDark = themeMode == ThemeMode.dark;
               return SwitchListTile(
                 secondary: Icon(Icons.dark_mode_outlined, color: theme.colorScheme.onSurfaceVariant),
                 title: const Text('Dark Mode'),
@@ -402,8 +404,8 @@ class _SettingsTab extends ConsumerWidget {
               );
             }),
           ),
+
           const SizedBox(height: AppTheme.spacingLg),
-          // Danger zone
           Text('Account Actions', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: AppTheme.spacingXs),
           Card(
@@ -413,7 +415,7 @@ class _SettingsTab extends ConsumerWidget {
                 'Sign Out',
                 style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error),
               ),
-              onTap: authCtrl.isLoading ? null : () => ref.read(authControllerProvider.notifier).logout(),
+              onTap: authCtrl.isLoading ? null : () => _showLogoutConfirmation(context, ref),
               trailing: authCtrl.isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : null,
@@ -423,9 +425,36 @@ class _SettingsTab extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _showLogoutConfirmation(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      ref.read(authControllerProvider.notifier).logout();
+    }
+  }
 }
 
-// ─── Shared Helpers ───────────────────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -436,10 +465,13 @@ class _StatCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingMd, horizontal: AppTheme.spacingSm),
+        padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingMd, horizontal: 4),
         child: Column(
           children: [
-            Text(value, style: theme.textTheme.titleLarge?.copyWith(color: AppTheme.primary)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value, style: theme.textTheme.titleLarge?.copyWith(color: AppTheme.primary)),
+            ),
             const SizedBox(height: 4),
             Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],
@@ -473,83 +505,3 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  final dynamic status;
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final label = status.toString().split('.').last;
-    Color color;
-    if (label == 'accepted') {
-      color = AppTheme.success;
-    } else if (label == 'rejected') {
-      color = AppTheme.error;
-    } else {
-      color = AppTheme.warning;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: AppTheme.borderRadiusSm,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
-
-class _EmptyHero extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  const _EmptyHero({
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingXl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppTheme.spacingLg),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 40, color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: AppTheme.spacingMd),
-            Text(title,
-                style: theme.textTheme.titleLarge,
-                textAlign: TextAlign.center),
-            const SizedBox(height: AppTheme.spacingXs),
-            Text(message,
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                textAlign: TextAlign.center),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: AppTheme.spacingLg),
-              FilledButton(onPressed: onAction, child: Text(actionLabel!)),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}

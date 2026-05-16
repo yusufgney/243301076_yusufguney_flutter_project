@@ -10,6 +10,7 @@ import '../providers/application_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_empty_state.dart';
 
 class AgencyDashboardPage extends ConsumerStatefulWidget {
   const AgencyDashboardPage({super.key});
@@ -66,7 +67,6 @@ class _AgencyDashboardPageState extends ConsumerState<AgencyDashboardPage> {
   }
 }
 
-// ─── Projects Tab ─────────────────────────────────────────────────────────────
 class _ProjectsTab extends ConsumerWidget {
   const _ProjectsTab();
 
@@ -111,7 +111,7 @@ class _ProjectsTab extends ConsumerWidget {
       body: projectsAsync.when(
         data: (projects) {
           if (projects.isEmpty) {
-            return _EmptyHero(
+            return AppEmptyState(
               icon: Icons.work_outline_rounded,
               title: 'No projects yet',
               message: 'Create your first casting call to find talent.',
@@ -231,7 +231,6 @@ class _MetaChip extends StatelessWidget {
   }
 }
 
-// ─── Profile Tab ──────────────────────────────────────────────────────────────
 class _ProfileTab extends ConsumerStatefulWidget {
   const _ProfileTab();
 
@@ -449,7 +448,6 @@ class _ProfileTabState extends ConsumerState<_ProfileTab> {
   }
 }
 
-// ─── Settings Tab ─────────────────────────────────────────────────────────────
 class _SettingsTab extends ConsumerWidget {
   const _SettingsTab();
 
@@ -483,8 +481,8 @@ class _SettingsTab extends ConsumerWidget {
           const SizedBox(height: AppTheme.spacingXs),
           Card(
             child: Consumer(builder: (context, ref, _) {
-              final themeModeAsync = ref.watch(themeModeProvider);
-              final isDark = themeModeAsync.value == ThemeMode.dark;
+              final themeMode = ref.watch(themeModeProvider);
+              final isDark = themeMode == ThemeMode.dark;
               return SwitchListTile(
                 secondary: Icon(Icons.dark_mode_outlined, color: theme.colorScheme.onSurfaceVariant),
                 title: const Text('Dark Mode'),
@@ -506,7 +504,7 @@ class _SettingsTab extends ConsumerWidget {
                   style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error)),
               onTap: authCtrl.isLoading
                   ? null
-                  : () => ref.read(authControllerProvider.notifier).logout(),
+                  : () => _showLogoutConfirmation(context, ref),
               trailing: authCtrl.isLoading
                   ? const SizedBox(
                       width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
@@ -517,9 +515,36 @@ class _SettingsTab extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _showLogoutConfirmation(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      ref.read(authControllerProvider.notifier).logout();
+    }
+  }
 }
 
-// ─── Reusable Form Field ───────────────────────────────────────────────────────
 class _FormField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -547,51 +572,3 @@ class _FormField extends StatelessWidget {
   }
 }
 
-// ─── Shared Empty Hero ────────────────────────────────────────────────────────
-class _EmptyHero extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  const _EmptyHero({
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingXl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppTheme.spacingLg),
-              decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
-              child: Icon(icon, size: 40, color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: AppTheme.spacingMd),
-            Text(title, style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
-            const SizedBox(height: AppTheme.spacingXs),
-            Text(message,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                textAlign: TextAlign.center),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: AppTheme.spacingLg),
-              FilledButton(onPressed: onAction, child: Text(actionLabel!)),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}

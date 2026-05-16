@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:csc_picker_plus/csc_picker_plus.dart';
 import '../models/actor_model.dart';
 import '../providers/actor_provider.dart';
 import '../providers/auth_provider.dart';
@@ -17,7 +18,6 @@ class EditActorProfilePage extends ConsumerStatefulWidget {
 
 class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  
   late TextEditingController _fullNameController;
   late TextEditingController _ageController;
   late TextEditingController _cityController;
@@ -25,8 +25,10 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
   late TextEditingController _weightController;
   late TextEditingController _skillsController;
   late TextEditingController _bioController;
-  
   String _gender = 'Male';
+  String _ethnicity = 'Other';
+  String _country = '';
+  String _city = '';
   Uint8List? _imageBytes;
   String? _imageExtension;
   String? _existingImageUrl;
@@ -42,15 +44,17 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
     _skillsController = TextEditingController();
     _bioController = TextEditingController();
 
-    // Load existing profile if it exists
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final profile = ref.read(actorProfileProvider).value;
       if (profile != null) {
         setState(() {
           _fullNameController.text = profile.fullName;
           _gender = profile.gender.isNotEmpty ? profile.gender : 'Male';
-          _ageController.text = profile.age.toString();
+          _ethnicity = profile.ethnicity.isNotEmpty ? profile.ethnicity : 'Other';
+          _country = profile.country;
+          _city = profile.city;
           _cityController.text = profile.city;
+          _ageController.text = profile.age.toString();
           _heightController.text = profile.height.toString();
           _weightController.text = profile.weight.toString();
           _skillsController.text = profile.skills.join(', ');
@@ -95,8 +99,10 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
       uid: user.uid,
       fullName: _fullNameController.text,
       gender: _gender,
+      ethnicity: _ethnicity,
       age: int.tryParse(_ageController.text) ?? 0,
-      city: _cityController.text,
+      city: _city,
+      country: _country,
       height: double.tryParse(_heightController.text) ?? 0.0,
       weight: double.tryParse(_weightController.text) ?? 0.0,
       skills: _skillsController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
@@ -127,8 +133,11 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
       }
     });
 
+    final profile = ref.watch(actorProfileProvider).value;
+    final isNewProfile = profile == null;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
+      appBar: AppBar(title: Text(isNewProfile ? 'Create Profile' : 'Edit Profile')),
       body: isSaving
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -138,7 +147,6 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── Avatar ──────────────────────────────────────────────
                     Center(
                       child: GestureDetector(
                         onTap: _pickImage,
@@ -179,7 +187,6 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
 
                     const SizedBox(height: 28),
 
-                    // ── Personal Info ────────────────────────────────────────
                     Text(
                       'Personal Information',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -213,9 +220,12 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                     ),
                     const SizedBox(height: 16),
 
-                    Row(
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 16,
                       children: [
-                        Expanded(
+                        SizedBox(
+                          width: (MediaQuery.of(context).size.width - 44) / 2,
                           child: TextFormField(
                             controller: _ageController,
                             decoration: const InputDecoration(
@@ -225,22 +235,73 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                             keyboardType: TextInputType.number,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _cityController,
+                        SizedBox(
+                          width: (MediaQuery.of(context).size.width - 44) / 2,
+                          child: DropdownButtonFormField<String>(
+                            initialValue: _ethnicity,
                             decoration: const InputDecoration(
-                              labelText: 'City',
-                              prefixIcon: Icon(Icons.location_on_outlined),
+                              labelText: 'Ethnicity',
+                              prefixIcon: Icon(Icons.groups_outlined),
                             ),
+                            items: [
+                              'Caucasian',
+                              'Black / African',
+                              'East Asian',
+                              'South Asian',
+                              'Hispanic / Latino',
+                              'Middle Eastern',
+                              'Mixed',
+                              'Other'
+                            ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                            onChanged: (val) {
+                              if (val != null) setState(() => _ethnicity = val);
+                            },
                           ),
                         ),
                       ],
                     ),
 
+                    const SizedBox(height: 16),
+
+                    Text(
+                      'Location',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    CSCPickerPlus(
+                      showStates: false,
+                      onCountryChanged: (value) {
+                        setState(() {
+                          _country = value;
+                        });
+                      },
+                      onStateChanged: (value) {},
+                      onCityChanged: (value) {
+                        setState(() {
+                          _city = value ?? "";
+                        });
+                      },
+                      layout: Layout.vertical,
+                      flagState: CountryFlag.DISABLE,
+                      dropdownDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1)),
+                      disabledDropdownDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1)),
+                      selectedItemStyle: Theme.of(context).textTheme.bodyLarge!,
+                      dropdownHeadingStyle: Theme.of(context).textTheme.titleLarge!,
+                      dropdownItemStyle: Theme.of(context).textTheme.bodyLarge!,
+                      searchBarRadius: 10.0,
+                    ),
+
                     const SizedBox(height: 28),
 
-                    // ── Physical Stats ───────────────────────────────────────
                     Text(
                       'Physical Stats',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -249,9 +310,12 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                     ),
                     const SizedBox(height: 12),
 
-                    Row(
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 16,
                       children: [
-                        Expanded(
+                        SizedBox(
+                          width: (MediaQuery.of(context).size.width - 44) / 2,
                           child: TextFormField(
                             controller: _heightController,
                             decoration: const InputDecoration(
@@ -261,8 +325,8 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                             keyboardType: TextInputType.number,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
+                        SizedBox(
+                          width: (MediaQuery.of(context).size.width - 44) / 2,
                           child: TextFormField(
                             controller: _weightController,
                             decoration: const InputDecoration(
@@ -277,7 +341,6 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
 
                     const SizedBox(height: 28),
 
-                    // ── Skills & Bio ─────────────────────────────────────────
                     Text(
                       'Skills & Bio',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -310,7 +373,6 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
 
                     const SizedBox(height: 32),
 
-                    // ── Save Button ──────────────────────────────────────────
                     ElevatedButton(
                       onPressed: _saveProfile,
                       child: const Text('Save Profile'),

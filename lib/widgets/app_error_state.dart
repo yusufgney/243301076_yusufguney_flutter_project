@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
-/// Consistent error presentation with optional retry.
 class AppErrorState extends StatelessWidget {
   final Object error;
   final String title;

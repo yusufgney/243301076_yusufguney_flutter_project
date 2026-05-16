@@ -5,7 +5,6 @@ import '../models/project_filter.dart';
 import '../providers/project_filter_provider.dart';
 import '../widgets/project_filter_form.dart';
 
-/// Full-screen project filters page.
 class ProjectFilterPage extends ConsumerWidget {
   const ProjectFilterPage({super.key});
 

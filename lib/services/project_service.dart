@@ -12,7 +12,6 @@ class ProjectService {
 
   ProjectService(this._firestore);
 
-  /// Fetch all casting projects (for actors).
   Stream<List<ProjectModel>> getAllProjects() {
     return _firestore
         .collection('casting_projects')
@@ -21,7 +20,6 @@ class ProjectService {
         .map((s) => s.docs.map((d) => ProjectModel.fromMap(d.data(), d.id)).toList());
   }
 
-  /// Fetch projects created by a specific agency.
   Stream<List<ProjectModel>> getAgencyProjects(String uid) {
     return _firestore
         .collection('casting_projects')
@@ -34,7 +32,6 @@ class ProjectService {
     });
   }
 
-  /// Delete a project (only the owner can delete).
   Future<void> deleteCastingProjectIfOwner({
     required String projectId,
     required String ownerUid,

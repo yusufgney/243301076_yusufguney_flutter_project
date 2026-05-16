@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/application_model.dart';
 
-/// Thrown when the actor already has an application for this project.
 class DuplicateApplicationException implements Exception {
   @override
   String toString() => 'You have already applied to this project.';
@@ -13,7 +12,6 @@ class ApplicationService {
 
   ApplicationService(this._firestore);
 
-  /// Deterministic id so each actor can have at most one doc per project.
   static String applicationDocId(String actorId, String projectId) =>
       '${actorId}_$projectId';
 
@@ -23,7 +21,6 @@ class ApplicationService {
         .doc(applicationDocId(actorId, projectId));
   }
 
-  /// Creates an application if none exists (transaction).
   Future<void> applyToProject({
     required String actorId,
     required String projectId,

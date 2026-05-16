@@ -56,7 +56,6 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (loc == '/splash' || isLoggingIn) return targetDashboard;
 
-      // Role guard
       if (loc.startsWith('/actor-dashboard') && role != UserRole.actor) {
         return targetDashboard;
       }

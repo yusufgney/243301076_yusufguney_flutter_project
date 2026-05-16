@@ -10,7 +10,6 @@ final applicationServiceProvider = Provider<ApplicationService>((ref) {
   return ApplicationService(ref.watch(firestoreProvider));
 });
 
-/// Current user's application for [projectId], if any.
 final actorApplicationForProjectProvider =
     StreamProvider.family<ApplicationModel?, String>((ref, projectId) {
   final user = ref.watch(authStateProvider).value;
@@ -21,18 +20,15 @@ final actorApplicationForProjectProvider =
       );
 });
 
-/// Number of applications submitted for [projectId] (for agency badges).
 final projectApplicationCountProvider = StreamProvider.family<int, String>((ref, projectId) {
   return ref.watch(applicationServiceProvider).watchApplicationsForProject(projectId).map((list) => list.length);
 });
 
-/// Applications submitted to [projectId] (for agency review).
 final applicationsForProjectProvider =
     StreamProvider.family<List<ApplicationModel>, String>((ref, projectId) {
   return ref.watch(applicationServiceProvider).watchApplicationsForProject(projectId);
 });
 
-/// Applications made by the current actor.
 final actorApplicationsListProvider = StreamProvider<List<ApplicationModel>>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return Stream.value([]);

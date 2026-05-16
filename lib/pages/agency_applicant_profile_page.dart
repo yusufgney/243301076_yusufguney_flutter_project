@@ -11,7 +11,6 @@ import '../widgets/access_denied_body.dart';
 import '../widgets/async_value_view.dart';
 import '../widgets/responsive_frame.dart';
 
-/// Read-only actor profile for agencies (e.g. from applicant list).
 class AgencyApplicantProfilePage extends ConsumerWidget {
   final String actorId;
 
@@ -85,8 +84,9 @@ class AgencyApplicantProfilePage extends ConsumerWidget {
                   const SizedBox(height: AppTheme.spacingLg),
                   _SectionTitle(title: 'Basics'),
                   _InfoRow(label: 'Gender', value: a.gender.isEmpty ? '—' : a.gender),
+                  _InfoRow(label: 'Ethnicity', value: a.ethnicity.isEmpty ? '—' : a.ethnicity),
                   _InfoRow(label: 'Age', value: a.age > 0 ? '${a.age}' : '—'),
-                  _InfoRow(label: 'City', value: a.city.isEmpty ? '—' : a.city),
+                  _InfoRow(label: 'Location', value: _formatLocation(a)),
                   _InfoRow(label: 'Height', value: a.height > 0 ? '${a.height} cm' : '—'),
                   _InfoRow(label: 'Weight', value: a.weight > 0 ? '${a.weight} kg' : '—'),
                   const SizedBox(height: AppTheme.spacingMd),
@@ -108,6 +108,13 @@ class AgencyApplicantProfilePage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  String _formatLocation(ActorModel a) {
+    if (a.city.isEmpty && a.country.isEmpty) return '—';
+    if (a.city.isEmpty) return a.country;
+    if (a.country.isEmpty) return a.city;
+    return '${a.country}, ${a.city}';
   }
 }
 

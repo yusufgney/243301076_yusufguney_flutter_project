@@ -9,7 +9,6 @@ import '../models/user_model.dart';
 import '../providers/application_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/project_provider.dart';
-import '../services/application_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_empty_state.dart';
 import '../widgets/app_error_state.dart';
@@ -18,7 +17,6 @@ import '../widgets/async_value_view.dart';
 import '../widgets/confirm_delete_casting_project_dialog.dart';
 import '../widgets/responsive_frame.dart';
 
-/// Shows all details for a selected casting project.
 class ProjectDetailPage extends ConsumerWidget {
   final String projectId;
   final ProjectModel? initialProject;
@@ -75,7 +73,6 @@ class ProjectDetailPage extends ConsumerWidget {
   }
 }
 
-/// Main content scaffold for project detail UI.
 class _ProjectDetailScaffold extends ConsumerWidget {
   final ProjectModel project;
 
@@ -94,10 +91,8 @@ class _ProjectDetailScaffold extends ConsumerWidget {
 
     ref.listen(applyToProjectControllerProvider, (previous, next) {
       if (next.hasError) {
-        final err = next.error;
-        final message = err is DuplicateApplicationException ? err.toString() : err.toString();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
+          SnackBar(content: Text(next.error.toString())),
         );
         return;
       }
@@ -209,7 +204,6 @@ class _ProjectDetailScaffold extends ConsumerWidget {
   }
 }
 
-/// Apply CTA and status for actors.
 class _ActorApplicationSection extends StatelessWidget {
   final ApplicationModel? existing;
   final bool isSubmitting;
@@ -262,7 +256,6 @@ class _ActorApplicationSection extends StatelessWidget {
   }
 }
 
-/// Reusable label/value row used in project detail.
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;

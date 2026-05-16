@@ -6,7 +6,6 @@ import '../providers/project_filter_provider.dart';
 import '../theme/app_theme.dart';
 import 'project_filter_form.dart';
 
-/// Presents filter controls in a modal bottom sheet.
 Future<void> showProjectFilterBottomSheet(BuildContext context, WidgetRef ref) {
   final current = ref.read(projectFilterProvider);
 
@@ -46,7 +45,6 @@ Future<void> showProjectFilterBottomSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
-/// Title for the filter bottom sheet.
 class ProjectFilterBottomSheetHeader extends StatelessWidget {
   const ProjectFilterBottomSheetHeader({super.key});
 

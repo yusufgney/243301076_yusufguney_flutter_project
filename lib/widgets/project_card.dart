@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/project_model.dart';
 import '../theme/app_theme.dart';
 
-/// Reusable card widget for rendering a casting project preview.
 class ProjectCard extends StatelessWidget {
   final ProjectModel project;
   final VoidCallback onTap;
@@ -67,7 +66,6 @@ class ProjectCard extends StatelessWidget {
   }
 }
 
-/// Compact metadata chip used in project cards.
 class _MetaChip extends StatelessWidget {
   final IconData icon;
   final String label;

@@ -5,7 +5,6 @@ import '../theme/app_theme.dart';
 
 typedef ProjectFilterCallback = void Function(ProjectFilter filter);
 
-/// Shared filter fields used by the bottom sheet and full-screen filter page.
 class ProjectFilterForm extends StatefulWidget {
   final ProjectFilter initial;
   final ProjectFilterCallback onApply;
@@ -88,7 +87,6 @@ class _ProjectFilterFormState extends State<ProjectFilterForm> {
 
     widget.onApply(filter);
   }
-
 
   @override
   Widget build(BuildContext context) {

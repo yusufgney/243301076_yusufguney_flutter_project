@@ -11,13 +11,15 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
-    final themeModeAsync = ref.watch(themeModeProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'Castflow',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: themeModeAsync.value ?? ThemeMode.light,
+      themeMode: themeMode,
+      themeAnimationDuration: const Duration(milliseconds: 250),
+      themeAnimationCurve: Curves.easeInOut,
       debugShowCheckedModeBanner: false,
       routerConfig: router,
     );

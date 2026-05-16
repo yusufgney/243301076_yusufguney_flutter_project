@@ -42,7 +42,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
-  /// Web/desktop: Enter submits when password field is focused (same as Create Account).
   bool _handleHardwareEnterKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
     final key = event.logicalKey;

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_breakpoints.dart';
 import '../theme/app_theme.dart';
 
-/// Horizontal margins + max-width constraint for page content (lists, forms, detail).
 class ResponsiveFrame extends StatelessWidget {
   final Widget child;
   final double maxContentWidth;

@@ -4,6 +4,8 @@ class ActorModel {
   final String gender;
   final int age;
   final String city;
+  final String country;
+  final String ethnicity;
   final double height;
   final double weight;
   final List<String> skills;
@@ -16,6 +18,8 @@ class ActorModel {
     required this.gender,
     required this.age,
     required this.city,
+    required this.country,
+    required this.ethnicity,
     required this.height,
     required this.weight,
     required this.skills,
@@ -30,6 +34,8 @@ class ActorModel {
       gender: map['gender'] as String? ?? '',
       age: map['age'] as int? ?? 0,
       city: map['city'] as String? ?? '',
+      country: map['country'] as String? ?? '',
+      ethnicity: map['ethnicity'] as String? ?? '',
       height: (map['height'] as num?)?.toDouble() ?? 0.0,
       weight: (map['weight'] as num?)?.toDouble() ?? 0.0,
       skills: List<String>.from(map['skills'] ?? []),
@@ -44,6 +50,8 @@ class ActorModel {
       'gender': gender,
       'age': age,
       'city': city,
+      'country': country,
+      'ethnicity': ethnicity,
       'height': height,
       'weight': weight,
       'skills': skills,
@@ -57,6 +65,8 @@ class ActorModel {
     String? gender,
     int? age,
     String? city,
+    String? country,
+    String? ethnicity,
     double? height,
     double? weight,
     List<String>? skills,
@@ -69,6 +79,8 @@ class ActorModel {
       gender: gender ?? this.gender,
       age: age ?? this.age,
       city: city ?? this.city,
+      country: country ?? this.country,
+      ethnicity: ethnicity ?? this.ethnicity,
       height: height ?? this.height,
       weight: weight ?? this.weight,
       skills: skills ?? this.skills,
