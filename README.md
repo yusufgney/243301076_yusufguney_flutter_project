@@ -55,7 +55,7 @@ Projeyi klonladıktan sonra uygulamanın **APK** çıktısını alıp **Android 
 git clone https://github.com/yusufgney/243301076_yusufguney_flutter_proje.git
 
 # Proje dizinine geçiş yapın:
-cd castflow
+cd 243301076_yusufguney_flutter_project
 
 # Gerekli Flutter paketlerini indirin:
 flutter pub get
