@@ -1,0 +1,370 @@
+================================================================================
+          CASTFLOW PROJESİ TEKNİK YAPISI VE VERİTABANI TASARIMI RAPORU
+================================================================================
+
+Bu rapor, "CastFlow - Oyuncu ve Ajans Yönetim Sistemi" projesinin mevcut teknik 
+yapısını detaylıca açıklamak ve ilişkisel veritabanı tasarımı prensiplerini 
+(1NF, 2NF, 3NF vb.) bu projenin alan modeli (domain model) üzerinden somut örneklerle 
+anlatmak amacıyla hazırlanmıştır.
+
+--------------------------------------------------------------------------------
+BÖLÜM 1: CASTFLOW PROJESİNİN TEKNİK YAPISI (TECHNICAL STRUCTURE)
+--------------------------------------------------------------------------------
+
+CastFlow, oyuncuların (actors) kast projelerine başvurabildiği, ajansların (agencies) 
+ise yeni projeler oluşturup başvuruları yönetebildiği iki yönlü bir platformdur. 
+Projede kullanılan temel teknolojiler, kütüphaneler ve mimari yapı aşağıda özetlenmiştir:
+
+1.1. Kullanılan Temel Teknolojiler
+  - Çatı (Framework): Flutter (Cross-platform mobil ve masaüstü geliştirme çatısı)
+  - Dil: Dart (Tip güvenli, nesne yönelimli ve null-safety destekli)
+  - Sunucu ve Bulut Altyapısı (Backend): Firebase Suite
+    * Firebase Authentication: Güvenli kullanıcı kaydı ve giriş işlemleri.
+    * Cloud Firestore: NoSQL mimarisinde, gerçek zamanlı (real-time) doküman tabanlı veritabanı.
+    * Firebase Storage: Oyuncu profil resimleri gibi medya dosyalarının saklanması.
+    * Firestore Security Rules: Veritabanı seviyesinde rol tabanlı erişim kontrolü.
+
+1.2. Projenin Durum Yönetimi (State Management)
+  - Projede modern ve performanslı bir durum yönetim kütüphanesi olan Flutter Riverpod (v2+) 
+    kullanılmaktadır. 
+  - Riverpod sayesinde veri akışları servislerden kontrollere (Notifier), oradan da arayüze 
+    reaktif bir şekilde aktarılır.
+  - Örnekler:
+    * `authStateProvider` ve `userModelProvider`: Kullanıcının oturum durumunu ve rolünü 
+      (actor/agency) dinler.
+    * `actorProvider` ve `agencyProvider`: İlgili kullanıcı türünün profillerini yönetir.
+    * `projectProvider` ve `applicationProvider`: İlanların ve başvuruların listelenmesini sağlar.
+
+1.3. Proje Klasör ve Mimari Yapısı (Folder Architecture)
+Proje, temiz mimari (Clean Architecture) ve modüler tasarım prensiplerine uygun olarak 
+`lib/` klasörü altında şu şekilde yapılandırılmıştır:
+
+  - `lib/models/`: Veri modellerinin (Data Models) tanımlandığı katmandır. Firestore'dan 
+    gelen harita (Map) verilerini Dart nesnelerine dönüştürür (`fromMap`) ve tam tersi işlemi 
+    yapar (`toMap`).
+    * `user_model.dart`: Temel kullanıcı verilerini (uid, email, role, createdAt) içerir.
+    * `actor_model.dart`: Oyuncunun kişisel özelliklerini (yaş, boy, kilo, yetenekler vb.) barındırır.
+    * `agency_model.dart`: Ajans bilgilerini (ajans adı, açıklama, iletişim vb.) barındırır.
+    * `project_model.dart`: Kast ilanlarının detaylarını (yaş aralığı, aranan yetenekler vb.) barındırır.
+    * `application_model.dart`: Başvuruları (durum: pending, accepted, rejected) modeller.
+
+  - `lib/services/`: Firebase Firestore, Auth ve Storage ile doğrudan haberleşen, ham veri 
+    işlemlerini (CRUD) yürüten servis katmanıdır.
+    * `auth_service.dart`, `actor_service.dart`, `agency_service.dart`, `project_service.dart`, 
+      `application_service.dart`.
+
+  - `lib/providers/`: Servislerden alınan verileri yöneten, iş mantığını (Business Logic) 
+    barındıran ve arayüze sunan Riverpod sağlayıcılarıdır.
+
+  - `lib/pages/`: Arayüz (UI) ekranlarını içerir. Rol tabanlı olarak iki ayrı dashboard bulunur:
+    * `login_page.dart` ve `register_page.dart`: Giriş ve Kayıt.
+    * `actor_dashboard_page.dart`: Oyuncu arayüzü (İlanları listeleme, profil düzenleme, başvurularım).
+    * `agency_dashboard_page.dart`: Ajans arayüzü (Kendi ilanları, başvuran oyuncuları görme, ilan açma).
+    * `project_applicants_page.dart` ve `agency_applicant_profile_page.dart`: Başvuruları yönetme.
+
+  - `lib/widgets/`: Proje genelinde tekrar kullanılan özelleştirilmiş butonlar, kartlar ve diyaloglar.
+  - `lib/theme/`: Uygulamanın Açık (Light) ve Koyu (Dark) mod temalarını barındırır.
+  - `lib/app_router.dart`: `go_router` paketi ile tanımlanmış, rol tabanlı yönlendirme (Guard) 
+    yapan yönlendirici dosyası.
+
+--------------------------------------------------------------------------------
+BÖLÜM 2: VERİTABANI TASARIMI VE KAVRAMLARI (DATABASE DESIGN)
+--------------------------------------------------------------------------------
+
+Veritabanı tasarımı, bir bilgi sisteminde depolanacak verilerin mantıksal ve fiziksel 
+yapısının belirlenmesi sürecidir. İyi bir veritabanı tasarımı:
+  - Veri tekrarını (redundancy) en aza indirir.
+  - Veri tutarlılığını ve bütünlüğünü (data integrity) korur.
+  - Sorgu performansını optimize eder.
+  - Ekleme, silme ve güncelleme işlemlerinde anormallikleri (anomalies) önler.
+
+Veritabanı Tasarım Aşamaları:
+  1. Gereksinim Analizi: Hangi verilerin saklanacağı belirlenir (CastFlow için: Oyuncular, 
+     Ajanslar, Kast İlanları, Başvurular, Yetenekler vb.).
+  2. Kavramsal Tasarım (ERD): Varlık-İlişki Diyagramı (Entity-Relationship Diagram) çizilir.
+  3. Mantıksal Tasarım: İlişkisel şemaların oluşturulması ve Normalizasyon kurallarının uygulanması.
+  4. Fiziksel Tasarım: Hedef veritabanı yönetim sistemine (SQL Server, PostgreSQL, MySQL vb.) 
+     göre tabloların ve indekslerin oluşturulması.
+
+--------------------------------------------------------------------------------
+BÖLÜM 3: VERİTABANI NORMALİZASYONU (NORMALIZATION)
+--------------------------------------------------------------------------------
+
+Normalizasyon, ilişkisel veritabanı (RDBMS) tasarımında tabloların mantıksal olarak 
+düzenlenmesi ve veri tekrarı ile tutarsızlıkların önlenmesi amacıyla uygulanan adımsal 
+bir yöntemdir. 
+
+CastFlow projesinin alan modelini kullanarak normalizasyon adımlarını (1NF, 2NF, 3NF) 
+aşağıdaki örneklerle inceleyelim.
+
+================================================================================
+ADIM 0: NORMALLEŞTİRİLMEMİŞ FORM (UNF - Unnormalized Form)
+================================================================================
+
+Tasarımımızın başlangıcında tüm verileri tek bir devasa tabloda tuttuğumuzu varsayalım. 
+Bu tabloda bir satırda birden fazla yetenek (skills) bilgisi virgülle ayrılarak yazılmış 
+olsun ve aynı zamanda ajans ile proje bilgileri de tekrarlansın.
+
+[UNF TABLOSU - OYUNCULAR VE BAŞVURULAR]
+---------------------------------------------------------------------------------------
+OyuncuID | OyuncuAdi    | Yetenekler (Skills)      | ProjeID | ProjeBasligi | AjansID | AjansAdi
+---------------------------------------------------------------------------------------
+A101     | Ahmet Yılmaz | Oyunculuk, Binicilik     | P201    | Dönem Filmi  | AG301   | Focus Cast
+A101     | Ahmet Yılmaz | Oyunculuk, Binicilik     | P202    | Reklam Filmi | AG302   | Star Cast
+A102     | Ayşe Kaya    | Dans, Şan, Oyunculuk     | P201    | Dönem Filmi  | AG301   | Focus Cast
+A103     | Mehmet Demir | Ehliyet, Yabancı Dil     | NULL    | NULL         | NULL    | NULL
+---------------------------------------------------------------------------------------
+
+Bu tablonun problemleri:
+  - Veri Tekrarı: "Ahmet Yılmaz" ve onun yetenekleri birden fazla satırda tekrar ediyor.
+  - Güncelleme Anomalisi: Ahmet Yılmaz soyadını değiştirirse, bunu tüm satırlarda güncellemek gerekir.
+  - Arama Zorluğu: "Oyunculuk" yeteneğine sahip kişileri bulmak için string parçalama (SQL'de LIKE '%Oyunculuk%') 
+    yapılması gerekir ki bu son derece yavaştır.
+
+================================================================================
+ADIM 1: BİRİNCİ NORMAL FORM (1NF)
+================================================================================
+
+1NF Kuralı: 
+  - Bir tablonun 1NF'de olması için, her bir hücrede (kolonda) yalnızca tek bir 
+    (atomik - bölünemez) değer bulunmalıdır. Tekrarlanan gruplar veya çoklu değer içeren 
+    alanlar (örneğin Yetenekler alanındaki virgüllü liste) kaldırılmalıdır.
+  - Her satır benzersiz bir birincil anahtar (Primary Key) ile tanımlanabilmelidir.
+
+[1NF UYGULAMASI]
+Yetenekler alanındaki çoklu değerleri ayırarak her yetenek için ayrı bir satır oluşturuyoruz.
+
+[1NF - OYUNCU_YETENEK TABLOSU]
+------------------------------------
+OyuncuID (PK) | OyuncuAdi    | Yetenek (PK)
+------------------------------------
+A101          | Ahmet Yılmaz | Oyunculuk
+A101          | Ahmet Yılmaz | Binicilik
+A102          | Ayşe Kaya    | Dans
+A102          | Ayşe Kaya    | Şan
+A102          | Ayşe Kaya    | Oyunculuk
+A103          | Mehmet Demir | Ehliyet
+A103          | Mehmet Demir | Yabancı Dil
+------------------------------------
+* Not: Bu tabloda Birincil Anahtar (Primary Key) (OyuncuID, Yetenek) kompozit (bileşik) anahtarıdır.
+
+[1NF - PROJE_BASVURU TABLOSU]
+-------------------------------------------------------------
+OyuncuID (PK) | ProjeID (PK) | ProjeBasligi | AjansID | AjansAdi
+-------------------------------------------------------------
+A101          | P201         | Dönem Filmi  | AG301   | Focus Cast
+A101          | P202         | Reklam Filmi | AG302   | Star Cast
+A102          | P201         | Dönem Filmi  | AG301   | Focus Cast
+-------------------------------------------------------------
+* Not: Birincil anahtar (OyuncuID, ProjeID) bileşik anahtarıdır.
+
+1NF Problemi:
+  - 1NF verileri atomik hale getirdi ancak veri tekrarlarını çözmedi. 
+  - `PROJE_BASVURU` tablosunda `ProjeBasligi`, `AjansID` ve `AjansAdi` bilgileri kompozit 
+    anahtarın tamamına bağımlı değildir! Sadece `ProjeID`'ye bağımlıdır. Bu durum bizi 2NF'ye götürür.
+
+================================================================================
+ADIM 2: İKİNCİ NORMAL FORM (2NF)
+================================================================================
+
+2NF Kuralı:
+  - Tablo 1NF formatında olmalıdır.
+  - Tabloda "Kısmi Bağımlılık" (Partial Dependency) bulunmamalıdır. Yani, anahtar olmayan 
+    hiçbir nitelik, bileşik (kompozit) birincil anahtarın sadece bir kısmına bağımlı olmamalıdır. 
+    Anahtar olmayan tüm alanlar, birincil anahtarın tamamına tam bağımlı olmalıdır.
+
+[2NF UYGULAMASI]
+`PROJE_BASVURU` tablosundaki `ProjeBasligi`, `AjansID` ve `AjansAdi` alanları kompozit anahtarın 
+(OyuncuID, ProjeID) tamamına değil, sadece `ProjeID`'ye bağlıdır. Bu yüzden bunları ayrı bir 
+`PROJELER` tablosuna taşıyoruz. Benzer şekilde `OYUNCU_YETENEK` tablosunda `OyuncuAdi` alanı 
+kompozit anahtarın (OyuncuID, Yetenek) tamamına değil sadece `OyuncuID`'ye bağlıdır. Bunu da ayırıyoruz.
+
+[Tablo 1: OYUNCULAR (Actors)]
+----------------------------
+OyuncuID (PK) | OyuncuAdi
+----------------------------
+A101          | Ahmet Yılmaz
+A102          | Ayşe Kaya
+A103          | Mehmet Demir
+----------------------------
+
+[Tablo 2: OYUNCU_YETENEKLERI]
+----------------------------
+OyuncuID (FK) | Yetenek
+----------------------------
+A101          | Oyunculuk
+A101          | Binicilik
+A102          | Dans
+A102          | Şan
+A102          | Oyunculuk
+A103          | Ehliyet
+A103          | Yabancı Dil
+----------------------------
+* Not: Bu iki tablo artık 2NF'dedir. `OyuncuAdi` sadece `OyuncuID`'ye bağlıdır.
+
+[Tablo 3: PROJELER (Casting Projects)]
+------------------------------------------------------
+ProjeID (PK) | ProjeBasligi | AjansID | AjansAdi
+------------------------------------------------------
+P201         | Dönem Filmi  | AG301   | Focus Cast
+P202         | Reklam Filmi | AG302   | Star Cast
+------------------------------------------------------
+
+[Tablo 4: BAŞVURULAR (Applications)]
+----------------------------
+OyuncuID (FK) | ProjeID (FK)
+----------------------------
+A101          | P201
+A101          | P202
+A102          | P201
+----------------------------
+
+2NF Problemi:
+  - `PROJELER` tablosuna bakalım. Birincil anahtarimiz `ProjeID`'dir.
+  - `AjansID` alanı `ProjeID`'ye bağlıdır (çünkü projeyi ajans açar).
+  - `AjansAdi` alanı ise `AjansID`'ye bağlıdır.
+  - Yani: `ProjeID -> AjansID -> AjansAdi` şeklinde bir geçişli bağımlılık (Transitive Dependency) vardır.
+  - Bu durum veri tutarsızlığına yol açabilir. Örneğin Focus Cast ajansının adı değişirse, 
+    ajansın açtığı tüm projeleri tek tek güncellenmemiz gerekir. Bu durum bizi 3NF'ye götürür.
+
+================================================================================
+ADIM 3: ÜÇÜNCÜ NORMAL FORM (3NF)
+================================================================================
+
+3NF Kuralı:
+  - Tablo 2NF formatında olmalıdır.
+  - Tabloda hiçbir "Geçişli Bağımlılık" (Transitive Dependency) bulunmamalıdır. Yani, anahtar 
+    olmayan hiçbir nitelik, başka bir anahtar olmayan niteliğe bağımlı olmamalıdır. Her alan 
+    yalnızca ve doğrudan birincil anahtara bağımlı olmalıdır.
+
+[3NF UYGULAMASI]
+`PROJELER` tablosundaki `AjansAdi` geçişli bağımlılığını kaldırmak için ajans verilerini ayrı 
+bir `AJANSLAR` tablosuna taşıyoruz.
+
+[Tablo 1: OYUNCULAR (Actors)]
+----------------------------
+OyuncuID (PK) | OyuncuAdi
+----------------------------
+A101          | Ahmet Yılmaz
+A102          | Ayşe Kaya
+A103          | Mehmet Demir
+----------------------------
+
+[Tablo 2: OYUNCU_YETENEKLERI]
+----------------------------
+OyuncuID (FK) | Yetenek
+----------------------------
+A101          | Oyunculuk
+A101          | Binicilik
+A102          | Dans
+A102          | Şan
+A102          | Oyunculuk
+A103          | Ehliyet
+A103          | Yabancı Dil
+----------------------------
+
+[Tablo 3: AJANSLAR (Agencies)]
+----------------------------
+AjansID (PK) | AjansAdi
+----------------------------
+AG301        | Focus Cast
+AG302        | Star Cast
+----------------------------
+
+[Tablo 4: PROJELER (Casting Projects)]
+------------------------------------------
+ProjeID (PK) | ProjeBasligi | AjansID (FK)
+------------------------------------------
+P201         | Dönem Filmi  | AG301
+P202         | Reklam Filmi | AG302
+------------------------------------------
+
+[Tablo 5: BAŞVURULAR (Applications)]
+----------------------------
+OyuncuID (FK) | ProjeID (FK)
+----------------------------
+A101          | P201
+A101          | P202
+A102          | P201
+----------------------------
+
+Tebrikler! Tasarımımız artık tamamen Üçüncü Normal Form (3NF) kurallarına uygundur.
+  - Veri tekrarı minimuma indirilmiştir.
+  - Her tablo tek bir konsepti temsil eder (Single Responsibility).
+  - Herhangi bir güncelleme veya silme işleminde tutarsızlık (anomali) yaşanma ihtimali sıfıra indirilmiştir.
+
+================================================================================
+BOYCE-CODD NORMAL FORM (BCNF) HAKKINDA BİLGİ
+================================================================================
+BCNF, 3NF'nin biraz daha güçlü ve katı bir versiyonudur. 
+  - Kural: Bir tablonun BCNF'de olması için, her belirleyicinin (determinant) bir 
+    aday anahtar (Candidate Key) olması gerekir. 
+  - Genellikle 3NF tablolarının %90'ı zaten BCNF'dedir. Ancak birden fazla çakışan bileşik 
+    aday anahtara sahip özel durumlarda BCNF kuralları devreye girer ve tabloyu daha da böler.
+  - Bizim yukarıdaki CastFlow ilişkisel şemamızda aday anahtarlar temiz olduğu için şemamız 
+    aynı zamanda BCNF ile uyumludur.
+
+--------------------------------------------------------------------------------
+BÖLÜM 4: NOSQL VE CLOUD FIRESTORE TASARIM YAKLAŞIMI
+--------------------------------------------------------------------------------
+
+CastFlow projesinde ilişkisel bir veritabanı (PostgreSQL/MySQL vb.) yerine NoSQL tabanlı 
+**Google Cloud Firestore** kullanılmaktadır. 
+
+4.1. SQL (İlişkisel) ve NoSQL (İlişkisel Olmayan) Farkları
+  * SQL (İlişkisel - Normalleştirilmiş): 
+    - Veri bütünlüğü ön plandadır. 
+    - Veriler tablolara bölünür ve `JOIN` sorguları ile birleştirilir.
+    - Yazma işlemleri güvenli ve tutarlıdır; ancak çok fazla tablonun `JOIN` edilmesi 
+      okuma performansını düşürebilir.
+  * NoSQL (İlişkisel Olmayan - Denormalize):
+    - Okuma performansını ve ölçeklenebilirliği (Scalability) maksimize etmek hedeflenir.
+    - `JOIN` kavramı yoktur. Bunun yerine veriler "gömülü" (embedded/nested) veya gevşek referanslı 
+      (referenced) şekilde saklanır.
+    - Veri tekrarı (denormalizasyon) bilinçli olarak kabul edilir.
+
+4.2. CastFlow'un Mevcut Firestore NoSQL Şeması
+Projede, Firestore'un sağladığı esneklik ve gerçek zamanlı yeteneklerden yararlanılarak 
+şu koleksiyonlar oluşturulmuştur:
+
+1. `users` Koleksiyonu (Doküman ID = `uid`)
+   - E-posta ve rol (actor/agency) bilgisini tutar.
+   - Hızlı kimlik kontrolü ve yönlendirme sağlar.
+
+2. `actors` Koleksiyonu (Doküman ID = `uid`)
+   - Oyuncunun tüm profil detaylarını tutar.
+   - Dikkat: Oyuncunun yetenekleri (`skills`) ilişkisel veritabanındaki gibi ayrı bir tabloda değil, 
+     dokümanın içinde bir **Dizi (List/Array)** olarak gömülü (`skills: ["Dans", "Şan"]`) tutulur. 
+     Bu NoSQL'in tipik bir özelliğidir ve tek sorguda oyuncunun tüm bilgilerine erişilmesini sağlar.
+
+3. `agencies` Koleksiyonu (Doküman ID = `uid`)
+   - Ajansın kurumsal profil bilgilerini saklar.
+
+4. `casting_projects` Koleksiyonu (Doküman ID = `projectId`)
+   - Proje detaylarını ve oluşturan ajansı referans olarak (`createdBy = agencyUid`) tutar.
+   - İlanın filtreleme kriterlerini (yaş aralığı, aranan yetenek dizisi) barındırır.
+
+5. `applications` Koleksiyonu (Doküman ID = `{actorId}_{projectId}`)
+   - Başvuru durumunu ve tarihini saklar.
+   - Doküman kimliğinin `{actorId}_{projectId}` şeklinde birleşik oluşturulması, bir oyuncunun 
+     aynı projeye mükerrer (birden fazla) başvuru yapmasını Firebase güvenlik kuralları 
+     seviyesinde engellemek için mükemmel bir tasarım tercihidir.
+
+6. `notifications` Koleksiyonu
+   - Oyunculara gönderilen durum güncellemelerini gerçek zamanlı takip eder.
+
+--------------------------------------------------------------------------------
+BÖLÜM 5: ÖZET VE SONUÇ
+--------------------------------------------------------------------------------
+
+* CastFlow projesi, ön yüzde **Flutter ve Riverpod** ile oldukça modüler, performanslı 
+  ve temiz bir kod mimarisine sahiptir.
+* Arka yüzde kullanılan **Cloud Firestore NoSQL** veritabanı, mobil uygulamalarda 
+  mükemmel bir gerçek zamanlı kullanıcı deneyimi sunar.
+* Geleneksel ilişkisel sistemlerde (SQL) ise projenin veri bütünlüğünü korumak adına 
+  **1NF, 2NF ve 3NF** kuralları uygulanarak veriler bölünmeli, veri tekrarları önlenmeli 
+  ve tablolar yabancı anahtarlarla (Foreign Key) ilişkilendirilmelidir. 
+* Modern yazılım mimarilerinde projenin ihtiyaçlarına göre SQL'in katı tutarlılığı veya 
+  NoSQL'in yüksek esneklik ve okuma performansı tercih edilir. CastFlow, mobil/web ön yüzlü 
+  bir sosyal platform olduğu için NoSQL (Firestore) seçimi son derece isabetlidir.
+================================================================================

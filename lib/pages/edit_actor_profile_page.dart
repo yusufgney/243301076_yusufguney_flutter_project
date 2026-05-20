@@ -238,6 +238,7 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                         SizedBox(
                           width: (MediaQuery.of(context).size.width - 44) / 2,
                           child: DropdownButtonFormField<String>(
+                            isExpanded: true,
                             initialValue: _ethnicity,
                             decoration: const InputDecoration(
                               labelText: 'Ethnicity',
@@ -252,7 +253,14 @@ class _EditActorProfilePageState extends ConsumerState<EditActorProfilePage> {
                               'Middle Eastern',
                               'Mixed',
                               'Other'
-                            ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                            ].map((e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(
+                                e,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            )).toList(),
                             onChanged: (val) {
                               if (val != null) setState(() => _ethnicity = val);
                             },

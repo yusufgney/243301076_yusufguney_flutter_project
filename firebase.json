@@ -15,8 +15,7 @@
         "lib/firebase_options.dart": {
           "projectId": "castflow-5ce2b",
           "configurations": {
-            "android": "1:71088167133:android:cc826e5477390c5005e334",
-            "web": "1:71088167133:web:1166cbf8b119bc4d05e334"
+            "android": "1:71088167133:android:cc826e5477390c5005e334"
           }
         }
       }
