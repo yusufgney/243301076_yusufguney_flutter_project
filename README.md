@@ -78,16 +78,13 @@ flutter emulators
 flutter emulators --launch <emulator_id>
 ```
 
-### 3. Uygulamayı APK Haline Getirme (Derleme)
+### 3. Uygulamayı APK Haline Getirme
 ```bash
-# Hata ayıklama (Debug) modunda APK derlemek için:
-flutter build apk --debug
-
-# (Veya) Yayınlanabilir (Release) modda APK derlemek için:
+# Release modda APK derlemek için:
 flutter build apk --release
 ```
 *Derleme tamamlandığında APK dosyanız şu dizinde oluşturulacaktır:*  
-`build/app/outputs/flutter-apk/app-debug.apk` (veya `app-release.apk`)
+`build/app/outputs/flutter-apk/app-release.apk`
 
 ### 4. APK'yı Emülatöre Yükleme ve Başlatma
 ```bash
@@ -95,7 +92,7 @@ flutter build apk --release
 flutter devices
 
 # Oluşturulan APK dosyasını doğrudan emülatöre yükleyip çalıştırmak için:
-flutter run -d <emulator_id> --use-application-binary build/app/outputs/flutter-apk/app-debug.apk
+flutter run -d <emulator_id> --use-application-binary build/app/outputs/flutter-apk/app-release.apk
 ```
 *Bu komut, derlenmiş olan APK dosyasını emülatörünüze yükleyecek ve uygulamayı otomatik olarak başlatacaktır.*
 
