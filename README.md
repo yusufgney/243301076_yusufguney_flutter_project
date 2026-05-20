@@ -4,6 +4,14 @@ Castflow, oyuncuların (Actors) kast projelerini inceleyip başvuru yapabildiği
 
 ---
 
+## 📱 Uygulama Ekran Görüntüleri
+
+| Projeler | Başvurularım | Profilim | Ayarlar |
+|:---:|:---:|:---:|:---:|
+| <img src="screenshots/projects.jpg" width="200"> | <img src="screenshots/applications.jpg" width="200"> | <img src="screenshots/profile.jpg" width="200"> | <img src="screenshots/settings.jpg" width="200"> |
+
+---
+
 ## 👨‍🎓 Öğrenci Bilgileri
 * **Öğrenci Adı ve Soyadı:** Yusuf Güney
 * **Öğrenci Numarası:** 243301076
