@@ -60,7 +60,7 @@ Projeyi klonladıktan sonra uygulamanın **APK** çıktısını alıp **Android 
 ### 1. Depoyu Klonlama ve Bağımlılıkları Yükleme
 ```bash
 # Projeyi yerel makinenize indirin:
-git clone https://github.com/yusufgney/243301076_yusufguney_flutter_proje.git
+git clone https://github.com/yusufgney/243301076_yusufguney_flutter_project.git
 
 # Proje dizinine geçiş yapın:
 cd 243301076_yusufguney_flutter_project
