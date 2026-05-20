@@ -14,13 +14,12 @@ Castflow, oyuncuların (Actors) kast projelerini inceleyip başvuru yapabildiği
 Uygulamayı hızlıca test edebilmeniz için hazır roller tanımlanmış test hesapları aşağıdadır:
 
 ### 🎭 Aktör (Oyuncu) Test Hesabı
-* **E-posta:** `actor@castflow.com`
-* **Şifre:** `password123`
+* **E-posta:** `user@gmail.com`
+* **Şifre:** `123456`
 
 ### 🏢 Ajans (Kast Ajansı) Test Hesabı
-* **E-posta:** `agency@castflow.com`
-* **Şifre:** `password123`
-
+* **E-posta:** `agency@gmail.com`
+* **Şifre:** `123456`
 > 💡 **Not:** Uygulamanın kayıt ekranından (Register Page) saniyeler içerisinde kendi e-posta adresinizle yeni bir Aktör veya Ajans hesabı da oluşturabilirsiniz.
 
 ---
