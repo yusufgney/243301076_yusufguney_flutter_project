@@ -180,6 +180,18 @@ class _AgencyProjectCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppTheme.spacingXs),
                 IconButton(
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  tooltip: 'Edit',
+                  onPressed: () => context.push('/edit-project/${project.id}', extra: project),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(36, 36),
+                    side: const BorderSide(color: AppTheme.outline),
+                    shape: RoundedRectangleBorder(borderRadius: AppTheme.borderRadiusSm),
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spacingXs),
+                IconButton(
                   icon: const Icon(Icons.info_outline, size: 18),
                   tooltip: 'Details',
                   onPressed: () => context.push('/project-detail/${project.id}', extra: project),
@@ -225,7 +237,12 @@ class _MetaChip extends StatelessWidget {
     final theme = Theme.of(context);
     return Chip(
       avatar: Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-      label: Text(label),
+      label: Text(
+        label,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
       padding: EdgeInsets.zero,
     );
   }

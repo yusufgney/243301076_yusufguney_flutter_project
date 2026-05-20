@@ -131,13 +131,30 @@ class _ProjectDetailScaffold extends ConsumerWidget {
                   ),
                   if (isAgency && ownsProject) ...[
                     const Divider(height: AppTheme.spacingXl),
-                    Semantics(
-                      label: 'Manage applicants for this project',
-                      child: FilledButton.tonalIcon(
-                        onPressed: () => context.push('/project-applicants/${project.id}'),
-                        icon: const Icon(Icons.people_outline),
-                        label: const Text('View applicants'),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Semantics(
+                            label: 'Manage applicants for this project',
+                            child: FilledButton.tonalIcon(
+                              onPressed: () => context.push('/project-applicants/${project.id}'),
+                              icon: const Icon(Icons.people_outline),
+                              label: const Text('View applicants'),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.spacingSm),
+                        Expanded(
+                          child: Semantics(
+                            label: 'Edit this casting project',
+                            child: OutlinedButton.icon(
+                              onPressed: () => context.push('/edit-project/${project.id}', extra: project),
+                              icon: const Icon(Icons.edit_outlined),
+                              label: const Text('Edit project'),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppTheme.spacingSm),
                     Semantics(

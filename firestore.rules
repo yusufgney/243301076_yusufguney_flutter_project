@@ -25,10 +25,6 @@ service cloud.firestore {
       return isSignedIn() && callerRole() == 'agency';
     }
 
-    function applicationDocPath(appId) {
-      return /databases/$(database)/documents/applications/$(appId);
-    }
-
     /// Project exists and was created by the given uid.
     function projectOwnedBy(projectId, uid) {
       return exists(/databases/$(database)/documents/casting_projects/$(projectId))
@@ -64,12 +60,7 @@ service cloud.firestore {
 
     // ─── /applications/{applicationId}  (id = "{actorId}_{projectId}") ───────
     match /applications/{applicationId} {
-      // Single-doc listen on a missing application must still be allowed (OR short-circuits).
-      allow read: if isSignedIn() && (
-        !exists(applicationDocPath(applicationId))
-        || resource.data.actorId == request.auth.uid
-        || projectOwnedBy(resource.data.projectId, request.auth.uid)
-      );
+      allow read: if isSignedIn();
 
       allow create: if isActor()
         && request.resource.data.actorId == request.auth.uid

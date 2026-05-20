@@ -249,7 +249,12 @@ class _ApplicantCardState extends ConsumerState<_ApplicantCard> {
             ),
             const SizedBox(height: AppTheme.spacingMd),
             OutlinedButton.icon(
-              onPressed: () => context.push('/agency-actor/${widget.application.actorId}'),
+              onPressed: () => context.push(
+                Uri(
+                  path: '/agency-actor/${widget.application.actorId}',
+                  queryParameters: {'projectId': widget.projectId},
+                ).toString(),
+              ),
               icon: const Icon(Icons.person_search_outlined, size: 20),
               label: const Text('View full profile'),
             ),

@@ -71,6 +71,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (loc.startsWith('/create-project') && role != UserRole.agency) {
         return targetDashboard;
       }
+      if (loc.startsWith('/edit-project') && role != UserRole.agency) {
+        return targetDashboard;
+      }
 
       return null;
     },
@@ -104,6 +107,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CreateProjectPage(),
       ),
       GoRoute(
+        path: '/edit-project/:id',
+        builder: (context, state) => CreateProjectPage(
+          projectId: state.pathParameters['id'],
+          initialProject: state.extra is ProjectModel
+              ? state.extra as ProjectModel
+              : null,
+        ),
+      ),
+      GoRoute(
         path: '/project-detail/:id',
         builder: (context, state) => ProjectDetailPage(
           projectId: state.pathParameters['id'] ?? '',
@@ -122,6 +134,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/agency-actor/:actorId',
         builder: (context, state) => AgencyApplicantProfilePage(
           actorId: state.pathParameters['actorId'] ?? '',
+          projectId: state.uri.queryParameters['projectId'],
         ),
       ),
     ],

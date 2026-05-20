@@ -250,7 +250,7 @@ class AppTheme {
         selectedColor: primary.withValues(alpha: 0.12),
         side: const BorderSide(color: outline, width: 0.8),
         shape: RoundedRectangleBorder(borderRadius: borderRadiusSm),
-        labelStyle: textTheme.labelMedium,
+        labelStyle: textTheme.labelMedium?.copyWith(color: onSurface),
         padding: const EdgeInsets.symmetric(horizontal: spacingXs, vertical: 4),
       ),
       listTileTheme: ListTileThemeData(

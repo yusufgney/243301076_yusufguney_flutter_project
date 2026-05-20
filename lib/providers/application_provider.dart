@@ -29,6 +29,15 @@ final applicationsForProjectProvider =
   return ref.watch(applicationServiceProvider).watchApplicationsForProject(projectId);
 });
 
+final applicationByActorAndProjectProvider =
+    StreamProvider.family<ApplicationModel?, ({String actorId, String projectId})>((ref, arg) {
+  return ref.watch(applicationServiceProvider).watchApplication(
+        actorId: arg.actorId,
+        projectId: arg.projectId,
+      );
+});
+
+
 final actorApplicationsListProvider = StreamProvider<List<ApplicationModel>>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return Stream.value([]);
